@@ -1,0 +1,31 @@
+# Root Git Ignore for Student Expense Tracker
+
+# Dependencies & Build Artefacts
+node_modules/
+.next/
+out/
+build/
+dist/
+target/
+*.class
+*.jar
+*.war
+
+# Environment & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE & OS Files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Maven
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
