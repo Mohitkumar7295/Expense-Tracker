@@ -1,9 +1,10 @@
-# Deployment Guide: Railway + Vercel + MongoDB Atlas
+# Deployment Guide: Render (Docker) + Vercel + MongoDB Atlas
 
-This guide walks through deploying the **Student Expense Tracker** to production:
+This guide provides end-to-end instructions for deploying the **Expense Tracker** application:
+- **Backend**: Render (Spring Boot 21 in Docker container)
+- **Frontend**: Vercel (Next.js 15 App Router)
 - **Database**: MongoDB Atlas (Cloud NoSQL)
-- **Backend**: Railway (Spring Boot 3 + Java 21)
-- **Frontend**: Vercel (Next.js App Router)
+- **Local Testing**: Docker Compose (`docker compose up`)
 
 ---
 
@@ -14,21 +15,21 @@ This guide walks through deploying the **Student Expense Tracker** to production
                 |
                 v HTTPS
        +-----------------+
-       |     Vercel      |
-       |    (Next.js)    |
+       |     Vercel      |  --> Next.js 15 Frontend
+       |   (Frontend)    |      https://<app>.vercel.app
        +--------+--------+
                 |
                 | REST API Calls (HTTPS + Bearer JWT)
                 v
        +-----------------+
-       |     Railway     |
-       |  (Spring Boot)  |
+       |     Render      |  --> Spring Boot 21 (Docker Container)
+       | (Backend API)   |      https://<app>.onrender.com
        +--------+--------+
                 |
-                | MongoDB Connection (TLS / SRV)
+                | MongoDB Wire Protocol (TLS / SRV)
                 v
        +-----------------+
-       |  MongoDB Atlas  |
+       |  MongoDB Atlas  |  --> Managed Cloud Database
        | (Database:      |
        |  expense_tracker|
        +-----------------+
@@ -36,87 +37,133 @@ This guide walks through deploying the **Student Expense Tracker** to production
 
 ---
 
-## 2. Step 1: MongoDB Atlas Setup
+## 2. Prerequisites & Setup
 
-1. **Create Free Tier Cluster**:
-   - Sign up at [mongodb.com/atlas](https://www.mongodb.com/atlas).
-   - Create a free `M0 Sandbox` cluster in your nearest region.
+1. **GitHub Repository**:
+   Make sure all code and newly generated Docker files are committed and pushed:
+   ```bash
+   git add .
+   git commit -m "feat: add Docker and deployment configuration for Render and Vercel"
+   git push origin main
+   ```
 
-2. **Create Database User**:
-   - Navigate to **Security** -> **Database Access**.
-   - Click **Add New Database User**.
-   - Authentication Method: **Password**.
-   - Username: `expense_user`
-   - Password: Choose a strong password and save it safely.
-   - User Privileges: `Read and write to any database`.
-
-3. **Configure Network Access**:
-   - Navigate to **Security** -> **Network Access**.
-   - Click **Add IP Address**.
-   - Select **Allow Access from Anywhere** (`0.0.0.0/0`) so that Railway's dynamic container IPs can connect to Atlas.
-
-4. **Obtain Connection String**:
-   - Click **Connect** -> **Drivers** (Java).
-   - Copy connection URI string:
+2. **MongoDB Atlas Account**: [mongodb.com/atlas](https://www.mongodb.com/atlas)
+   - Ensure an `M0` (Free) cluster is active.
+   - Go to **Network Access** -> **Add IP Address** -> Choose **Allow Access From Anywhere** (`0.0.0.0/0`). *(Render instances use dynamic outbound IPs).*
+   - Go to **Database Access** -> Ensure a database user exists with read/write permissions.
+   - Copy your connection string from **Connect** -> **Drivers** (Java):
      ```
-     mongodb+srv://expense_user:<password>@cluster0.mongodb.net/expense_tracker?retryWrites=true&w=majority
+     mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/expense_tracker?retryWrites=true&w=majority
      ```
 
 ---
 
-## 3. Step 2: Backend Deployment on Railway
+## 3. Step 1: Deploy Backend to Render (Docker Web Service)
 
-1. **Push to GitHub**:
-   Ensure your backend code is committed to a GitHub repository.
+Render automatically builds and runs the container using [`expense-tracker-backend/Dockerfile`](file:///c:/Users/mokum/OneDrive/Desktop/ExpenseTracker/expense-tracker-backend/Dockerfile).
 
-2. **Create New Project in Railway**:
-   - Log in at [railway.app](https://railway.app).
-   - Click **New Project** -> **Deploy from GitHub repo**.
-   - Select your `ExpenseTracker` repository and set the **Root Directory** to `/expense-tracker-backend`.
+### Option A: Via Render Dashboard (Recommended)
 
-3. **Configure Environment Variables in Railway**:
-   Under project **Variables**, add:
+1. Log in to [render.com](https://render.com).
+2. Click **New +** -> **Web Service**.
+3. Select **Build and deploy from a Git repository** and connect your `ExpenseTracker` repository.
+4. Configure the service:
+   - **Name**: `expense-tracker-backend` (or your preferred name)
+   - **Region**: Choose the closest region to you (e.g., Oregon, Ohio, Frankfurt, Singapore)
+   - **Branch**: `main`
+   - **Root Directory**: `expense-tracker-backend`
+   - **Runtime**: **Docker**
+   - **Dockerfile Path**: `Dockerfile` *(relative to Root Directory)*
+   - **Instance Type**: **Free**
+5. Expand **Advanced Settings**:
+   - **Health Check Path**: `/api/health`
+6. Add the following **Environment Variables**:
 
-   | Variable Key | Example Value | Description |
-   | :--- | :--- | :--- |
-   | `PORT` | `8080` | Server listening port |
-   | `MONGODB_URI` | `mongodb+srv://expense_user:pass@...` | MongoDB Atlas URI |
-   | `JWT_SECRET` | `5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437` | Secure 256-bit hex/base64 secret |
-   | `MAIL_USERNAME` | `yourapp@gmail.com` | Email used to send OTPs |
-   | `MAIL_PASSWORD` | `xxxx xxxx xxxx xxxx` | 16-character Google App Password |
-   | `FRONTEND_URL` | `https://your-frontend.vercel.app` | Vercel domain for CORS |
+| Key | Value / Example | Description |
+| :--- | :--- | :--- |
+| `PORT` | `8080` | Internal server port (Render auto-routes web traffic) |
+| `MONGODB_URI` | `mongodb+srv://<user>:<pwd>@cluster.mongodb.net/expense_tracker?retryWrites=true&w=majority` | Atlas URI |
+| `JWT_SECRET` | `404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970` | 256-bit secret key |
+| `CORS_ALLOWED_ORIGINS` | `https://*.vercel.app,http://localhost:3000` | Allowed origins (update with exact Vercel URL once created) |
+| `MAIL_HOST` | `smtp.gmail.com` | SMTP host |
+| `MAIL_PORT` | `587` | SMTP TLS port |
+| `MAIL_USERNAME` | `your-email@gmail.com` | Gmail for sending OTPs |
+| `MAIL_PASSWORD` | `your-app-password` | Google 16-character App Password |
 
-4. **Generate Public Domain**:
-   - Under **Settings** -> **Networking**, click **Generate Domain**.
-   - Example: `https://expense-tracker-backend.up.railway.app`
+7. Click **Create Web Service**.
+8. Render will build the Docker container and start your Spring Boot application.
+9. Note your Render URL: `https://expense-tracker-backend-xxxx.onrender.com`.
+10. Test health check in your browser or curl:
+    ```bash
+    curl https://expense-tracker-backend-xxxx.onrender.com/api/health
+    ```
+    Expected response:
+    ```json
+    {"database":"CONNECTED","databaseName":"expense_tracker","ping":1,"status":"UP"}
+    ```
+
+> [!NOTE]
+> Render Free Tier services spin down after 15 minutes of inactivity. The first request after sleep may take ~30-50 seconds to respond while the container wakes up.
 
 ---
 
-## 4. Step 3: Frontend Deployment on Vercel
+## 4. Step 2: Deploy Frontend to Vercel
 
-1. **Import Project to Vercel**:
-   - Log in at [vercel.com](https://vercel.com).
-   - Click **Add New** -> **Project**.
-   - Select your GitHub repository.
-   - Set **Root Directory** to `expense-tracker-frontend`.
+1. Log in to [vercel.com](https://vercel.com).
+2. Click **Add New...** -> **Project**.
+3. Import your `ExpenseTracker` GitHub repository.
+4. Configure Project Settings:
+   - **Framework Preset**: **Next.js** *(Auto-detected)*
+   - **Root Directory**: Click **Edit** and select **`expense-tracker-frontend`**.
+5. Under **Environment Variables**, add:
 
-2. **Configure Environment Variables in Vercel**:
-   Under **Environment Variables**, add:
+| Key | Value | Notes |
+| :--- | :--- | :--- |
+| `NEXT_PUBLIC_API_URL` | `https://expense-tracker-backend-xxxx.onrender.com` | Your live Render backend URL (no trailing slash) |
 
-   | Variable Key | Value | Description |
-   | :--- | :--- | :--- |
-   | `NEXT_PUBLIC_API_URL` | `https://expense-tracker-backend.up.railway.app` | Railway backend public URL |
-
-3. **Deploy**:
-   - Click **Deploy**.
-   - Vercel will build and assign your domain: `https://your-app.vercel.app`.
+6. Click **Deploy**.
+7. Vercel will build and assign your production domain: `https://your-frontend-name.vercel.app`.
 
 ---
 
-## 5. Security & Verification Checklist
+## 5. Step 3: Link CORS between Vercel & Render
 
-- [ ] `0.0.0.0/0` IP whitelist allowed in MongoDB Atlas.
-- [ ] Railway backend URL added to CORS allowed origins in Spring Boot.
-- [ ] Vercel `NEXT_PUBLIC_API_URL` points to Railway with `https://`.
-- [ ] Google 2-Step Verification and App Password generated for SMTP.
-- [ ] No plaintext passwords or JWT secrets checked into Git.
+Once you have your production Vercel domain:
+1. Go back to your **Render Dashboard** -> `expense-tracker-backend` -> **Environment**.
+2. Update `CORS_ALLOWED_ORIGINS`:
+   ```
+   https://your-frontend-name.vercel.app,https://*.vercel.app,http://localhost:3000
+   ```
+3. Save changes. Render will automatically trigger a rolling restart with updated CORS permissions.
+
+---
+
+## 6. Local Testing with Docker Compose
+
+If you have Docker Desktop installed, you can spin up MongoDB, Backend, and Frontend all together locally:
+
+```bash
+# Build and start all 3 containers
+docker compose up --build
+
+# Run in background
+docker compose up -d
+
+# Stop all containers
+docker compose down
+```
+
+Services exposed:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **MongoDB**: `mongodb://localhost:27017/expense_tracker`
+
+---
+
+## 7. Troubleshooting & Verification Checklist
+
+- [ ] **MongoDB Atlas IP Access**: Is `0.0.0.0/0` whitelisted under Atlas Network Access?
+- [ ] **CORS Configuration**: Does `CORS_ALLOWED_ORIGINS` in Render match your Vercel deployment URL?
+- [ ] **Trailing Slashes**: Ensure `NEXT_PUBLIC_API_URL` on Vercel does **NOT** end with `/` (e.g. `https://app.onrender.com`, not `https://app.onrender.com/`).
+- [ ] **Health Endpoint**: Does `https://<render-url>/api/health` return `{"status":"UP"}`?
+- [ ] **Render Sleep**: If the frontend hangs on initial load, remember that Render Free Tier spins down after 15 mins of inactivity. The first API ping will wake it up.

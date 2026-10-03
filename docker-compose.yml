@@ -1,0 +1,61 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: expense-tracker-db
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: expense_tracker
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - expense-tracker-network
+
+  backend:
+    build:
+      context: ./expense-tracker-backend
+      dockerfile: Dockerfile
+    container_name: expense-tracker-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      MONGODB_URI: mongodb://mongodb:27017/expense_tracker
+      JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+      CORS_ALLOWED_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000,https://*.vercel.app"
+      MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-studentexpensetracker3@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-uldggkaynxlidwqs}
+    depends_on:
+      - mongodb
+    networks:
+      - expense-tracker-network
+
+  frontend:
+    build:
+      context: ./expense-tracker-frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+    container_name: expense-tracker-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:8080
+    depends_on:
+      - backend
+    networks:
+      - expense-tracker-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  expense-tracker-network:
+    driver: bridge
