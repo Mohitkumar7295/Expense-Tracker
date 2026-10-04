@@ -41,6 +41,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage(), "BAD_REQUEST"));
     }
 
+    @ExceptionHandler(org.springframework.dao.DataAccessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataAccessException(org.springframework.dao.DataAccessException ex) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(ApiResponse.error("Unable to connect to the database. Please verify MONGODB_URI configuration in backend environment variables.", "DATABASE_CONNECTION_ERROR"));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
