@@ -1,6 +1,12 @@
 # Student Expense Tracker 🎓💸
 
+[![Live Demo on Vercel](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://expense-tracker-xi-lake.vercel.app/)
+[![Backend](https://img.shields.io/badge/Backend-Spring%20Boot%203-brightgreen?style=for-the-badge&logo=springboot)](https://github.com/Mohitkumar7295/Expense-Tracker)
+[![Database](https://img.shields.io/badge/Database-MongoDB%20Atlas-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/atlas)
+
 A modern, fast, and secure full-stack web application tailored for college and university students to effortlessly monitor, categorize, and control their daily expenses against a monthly budget.
+
+🌐 **Live Web App**: [https://expense-tracker-xi-lake.vercel.app/](https://expense-tracker-xi-lake.vercel.app/)
 
 Built with **Next.js (React + TypeScript + Tailwind CSS)** on the frontend and **Java Spring Boot 3 + Spring Security + MongoDB Atlas** on the backend.
 
@@ -25,7 +31,7 @@ Built with **Next.js (React + TypeScript + Tailwind CSS)** on the frontend and *
 | **Backend** | [Java 21/23](https://www.oracle.com/java/), [Spring Boot 3+](https://spring.io/projects/spring-boot), [Spring Security](https://spring.io/projects/spring-security), [Spring Data MongoDB](https://spring.io/projects/spring-data-mongodb), [JJWT](https://github.com/jwtk/jjwt), [Maven](https://maven.apache.org/) |
 | **Database** | [MongoDB Atlas](https://www.mongodb.com/atlas) (Managed NoSQL Cloud Database) |
 | **Email Service** | Spring Mail with SMTP (Gmail / SendGrid / Amazon SES) |
-| **Deployment** | Frontend on **Vercel**, Backend on **Railway**, Database on **MongoDB Atlas** |
+| **Deployment** | Frontend on **Vercel** ([Live App](https://expense-tracker-xi-lake.vercel.app/)), Backend on **Render** (Docker), Database on **MongoDB Atlas** |
 
 ---
 

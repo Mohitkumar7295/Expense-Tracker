@@ -122,7 +122,7 @@ Render automatically builds and runs the container using [`expense-tracker-backe
 | `NEXT_PUBLIC_API_URL` | `https://expense-tracker-backend-xxxx.onrender.com` | Your live Render backend URL (no trailing slash) |
 
 6. Click **Deploy**.
-7. Vercel will build and assign your production domain: `https://your-frontend-name.vercel.app`.
+7. Vercel will build and assign your production domain: `https://expense-tracker-xi-lake.vercel.app`.
 
 ---
 
@@ -132,7 +132,7 @@ Once you have your production Vercel domain:
 1. Go back to your **Render Dashboard** -> `expense-tracker-backend` -> **Environment**.
 2. Update `CORS_ALLOWED_ORIGINS`:
    ```
-   https://your-frontend-name.vercel.app,https://*.vercel.app,http://localhost:3000
+   https://expense-tracker-xi-lake.vercel.app,https://*.vercel.app,http://localhost:3000
    ```
 3. Save changes. Render will automatically trigger a rolling restart with updated CORS permissions.
 
