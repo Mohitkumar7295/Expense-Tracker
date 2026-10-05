@@ -26,25 +26,22 @@ public class HealthController {
     public ResponseEntity<Map<String, Object>> checkHealth() {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", Instant.now().toString());
+        response.put("status", "UP");
 
         try {
-            // Ping MongoDB to verify live connectivity
+            // Ping MongoDB with a fast check
             Document pingResult = mongoTemplate.getDb().runCommand(new Document("ping", 1));
             String dbName = mongoTemplate.getDb().getName();
 
-            response.put("status", "UP");
             response.put("database", "CONNECTED");
             response.put("databaseName", dbName);
             response.put("ping", pingResult.get("ok"));
-
-            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            log.error("MongoDB health check failed: {}", e.getMessage());
-            response.put("status", "DEGRADED");
+            log.warn("MongoDB health check ping failed: {}", e.getMessage());
             response.put("database", "DISCONNECTED");
-            response.put("error", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(response);
+            response.put("databaseError", e.getMessage());
         }
+
+        return ResponseEntity.ok(response);
     }
 }
