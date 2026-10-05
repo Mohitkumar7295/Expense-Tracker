@@ -1,12 +1,13 @@
 # Student Expense Tracker 🎓💸
 
 [![Live Demo on Vercel](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://expense-tracker-xi-lake.vercel.app/)
-[![Backend](https://img.shields.io/badge/Backend-Spring%20Boot%203-brightgreen?style=for-the-badge&logo=springboot)](https://github.com/Mohitkumar7295/Expense-Tracker)
+[![Backend API on Render](https://img.shields.io/badge/Backend%20API-Render-46E3B7?style=for-the-badge&logo=render)](https://expense-tracker-aqre.onrender.com/api/health)
 [![Database](https://img.shields.io/badge/Database-MongoDB%20Atlas-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/atlas)
 
 A modern, fast, and secure full-stack web application tailored for college and university students to effortlessly monitor, categorize, and control their daily expenses against a monthly budget.
 
-🌐 **Live Web App**: [https://expense-tracker-xi-lake.vercel.app/](https://expense-tracker-xi-lake.vercel.app/)
+- 🌐 **Live Frontend (Vercel)**: [https://expense-tracker-xi-lake.vercel.app/](https://expense-tracker-xi-lake.vercel.app/)
+- ⚙️ **Live Backend API (Render)**: [https://expense-tracker-aqre.onrender.com/api/health](https://expense-tracker-aqre.onrender.com/api/health)
 
 Built with **Next.js (React + TypeScript + Tailwind CSS)** on the frontend and **Java Spring Boot 3 + Spring Security + MongoDB Atlas** on the backend.
 

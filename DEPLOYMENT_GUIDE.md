@@ -92,10 +92,10 @@ Render automatically builds and runs the container using [`expense-tracker-backe
 
 7. Click **Create Web Service**.
 8. Render will build the Docker container and start your Spring Boot application.
-9. Note your Render URL: `https://expense-tracker-backend-xxxx.onrender.com`.
+9. Note your Render URL: `https://expense-tracker-aqre.onrender.com`.
 10. Test health check in your browser or curl:
     ```bash
-    curl https://expense-tracker-backend-xxxx.onrender.com/api/health
+    curl https://expense-tracker-aqre.onrender.com/api/health
     ```
     Expected response:
     ```json
@@ -119,7 +119,7 @@ Render automatically builds and runs the container using [`expense-tracker-backe
 
 | Key | Value | Notes |
 | :--- | :--- | :--- |
-| `NEXT_PUBLIC_API_URL` | `https://expense-tracker-backend-xxxx.onrender.com` | Your live Render backend URL (no trailing slash) |
+| `NEXT_PUBLIC_API_URL` | `https://expense-tracker-aqre.onrender.com` | Your live Render backend URL (no trailing slash) |
 
 6. Click **Deploy**.
 7. Vercel will build and assign your production domain: `https://expense-tracker-xi-lake.vercel.app`.
